@@ -5,9 +5,10 @@ import (
 )
 
 func main() {
-	var a app.Server
-	a.CreateConnection()
-	a.Migrate()
-	a.CreateRoutes()
-	a.Run()
+	var server app.Server
+	server.CreateConnection()
+	server.CreateTables()
+	server.Migrate()
+	server.CreateRoutes()
+	server.Run()
 }

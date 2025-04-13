@@ -8,6 +8,7 @@ import (
 
 	"github.com/WilliamDeLaEspriella/go-swechallenge/config"
 	controller "github.com/WilliamDeLaEspriella/go-swechallenge/controllers"
+	"github.com/WilliamDeLaEspriella/go-swechallenge/db"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -39,11 +40,23 @@ func (server *Server) CreateConnection() {
 	server.DB = db
 }
 
-func (server *Server) Migrate() {
+func (server *Server) CreateTables() {
 	if _, err := server.DB.Exec(
-		"CREATE TABLE IF NOT EXISTS rating_changes (id SERIAL NOT NULL PRIMARY KEY,ticker VARCHAR(10) NOT NULL,company VARCHAR(100) NOT NULL,brokerage VARCHAR(100) NOT NULL,action VARCHAR(20) NOT NULL,rating_from VARCHAR(50),rating_to VARCHAR(50),target_from DECIMAL(10, 2),target_to DECIMAL(10, 2),created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"); err != nil {
+		"CREATE TABLE IF NOT EXISTS rating_changes (id SERIAL NOT NULL PRIMARY KEY,ticker VARCHAR(10) NOT NULL,company VARCHAR(100) NOT NULL,brokerage VARCHAR(100) NOT NULL,action VARCHAR(20) NOT NULL,rating_from VARCHAR(50),rating_to VARCHAR(50),target_from VARCHAR(50),target_to VARCHAR(50),created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"); err != nil {
 		log.Fatal(err)
 		log.Println("ERROR", err)
+	}
+}
+
+func (server *Server) Migrate() {
+	var count int
+	err := server.DB.QueryRow("SELECT COUNT(*) FROM rating_changes").Scan(&count)
+	if err != nil {
+		log.Fatal("failed to execute setup db query", err)
+	}
+	if count == 0 {
+		setupDb := db.NewSetupDb(server.DB)
+		setupDb.BulkRatingChanges()
 	}
 }
 

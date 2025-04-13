@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  api:
+    container_name: api_dockerizing
+    build: .
+    ports:
+      - 8080:8080
+    restart: always
+    volumes:
+      - api_volume:/usr/src/app/
+    networks:
+      - fullstack
+
+volumes:
+  database_dockerizing:
+  api_volume:
+
+networks:
+  fullstack:
+    driver: bridge

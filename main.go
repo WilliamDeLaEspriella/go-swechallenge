@@ -7,7 +7,7 @@ import (
 func main() {
 	var server app.Server
 	server.CreateConnection()
-	server.CreateTables()
+	//server.CreateTables()
 	server.Migrate()
 	server.CreateRoutes()
 	server.Run()

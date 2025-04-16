@@ -45,9 +45,9 @@ func (repository *RatingChangeRepository) InsertRatingChange(post model.PostRati
 	return true
 }
 
-func (repository *RatingChangeRepository) SelectRatingChange() []model.RatingChange {
+func (repository *RatingChangeRepository) SelectRatingChange(limit int, offset int) []model.RatingChange {
 	var result []model.RatingChange
-	rows, err := repository.DB.Query("SELECT * FROM rating_changes")
+	rows, err := repository.DB.Query("SELECT id, ticker, company, brokerage, action, rating_from, rating_to, target_from, target_to FROM rating_changes ORDER BY created_at DESC LIMIT $1 OFFSET $2", limit, offset)
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -61,9 +61,9 @@ func (repository *RatingChangeRepository) SelectRatingChange() []model.RatingCha
 			action     string
 			ratingFrom string
 			ratingTo   string
-			targetFrom string
-			targetTo   string
-			createdAt  string
+			targetFrom float64
+			targetTo   float64
+		//	createdAt  string
 		)
 		err := rows.Scan(
 			&id,
@@ -75,7 +75,7 @@ func (repository *RatingChangeRepository) SelectRatingChange() []model.RatingCha
 			&ratingTo,
 			&targetFrom,
 			&targetTo,
-			&createdAt,
+		//	&createdAt,
 		)
 		if err != nil {
 			log.Println(err)
@@ -90,7 +90,7 @@ func (repository *RatingChangeRepository) SelectRatingChange() []model.RatingCha
 				RatingTo:   ratingTo,
 				TargetFrom: targetFrom,
 				TargetTo:   targetTo,
-				CreatedAt:  createdAt,
+				//	CreatedAt:  createdAt,
 			}
 			result = append(result, manga)
 		}

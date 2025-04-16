@@ -50,7 +50,7 @@ func (server *Server) CreateTables() {
 			action VARCHAR(20) NOT NULL,
 			rating_from VARCHAR(50),
 			rating_to VARCHAR(50),
-			target_from DECIMAL(10, 2)),
+			target_from DECIMAL(10, 2),
 			target_to DECIMAL(10, 2),
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`,
 	); err != nil {

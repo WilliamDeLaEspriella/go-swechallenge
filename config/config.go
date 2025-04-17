@@ -16,6 +16,7 @@ type EnvConfig struct {
 	POSTGRES_URI      string
 	SETUP_DB_URL      string
 	SETUP_DB_TOKEN    string
+	POLYGON_API_KEY   string
 }
 
 var Envs *EnvConfig
@@ -35,6 +36,7 @@ func init() {
 		POSTGRES_URI:      getEnv("POSTGRES_URI", "postgres:5432"),
 		SETUP_DB_URL:      getEnv("SETUP_DB_URL", ""),
 		SETUP_DB_TOKEN:    getEnv("SETUP_DB_TOKEN", ""),
+		POLYGON_API_KEY:   getEnv("POLYGON_API_KEY", ""),
 	}
 }
 

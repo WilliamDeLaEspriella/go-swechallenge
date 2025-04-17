@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"strconv"
 
+	"github.com/WilliamDeLaEspriella/go-swechallenge/finance"
 	model "github.com/WilliamDeLaEspriella/go-swechallenge/models"
 	"github.com/WilliamDeLaEspriella/go-swechallenge/repository"
 	"github.com/gin-gonic/gin"
@@ -70,5 +71,16 @@ func (controller *RatingChangesController) BestRatingChanges(g *gin.Context) {
 		g.JSON(200, gin.H{"status": "success", "data": ratings_changes, "msg": "get ratings_changes successfully"})
 	} else {
 		g.JSON(200, gin.H{"status": "success", "data": nil, "msg": "get ratings_changes successfully"})
+	}
+}
+
+func (controller *RatingChangesController) RatingChangesDetails(g *gin.Context) {
+	id := g.Param("id")
+	financeApi := finance.NewFinance(id)
+	financeStock := financeApi.GetFinanceStock()
+	if financeStock != nil {
+		g.JSON(200, gin.H{"status": "success", "data": financeStock})
+	} else {
+		g.JSON(200, gin.H{"status": "success", "data": nil})
 	}
 }

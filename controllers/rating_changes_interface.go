@@ -6,4 +6,5 @@ type RatingChangesControllerInterface interface {
 	InsertRatingChanges(g *gin.Context)
 	GetRatingChanges(g *gin.Context)
 	BestRatingChanges(g *gin.Context)
+	RatingChangesDetails(g *gin.Context)
 }

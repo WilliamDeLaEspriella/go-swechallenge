@@ -82,6 +82,7 @@ func (server *Server) CreateRoutes() {
 	routes.GET("/rating_changes", controller.GetRatingChanges)
 	routes.POST("/rating_changes", controller.InsertRatingChanges)
 	routes.GET("/rating_changes/recommendation", controller.BestRatingChanges)
+	routes.GET("/rating_changes/:id", controller.RatingChangesDetails)
 }
 
 func (server *Server) Run() {

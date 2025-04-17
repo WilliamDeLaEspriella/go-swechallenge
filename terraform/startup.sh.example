@@ -1,0 +1,16 @@
+#!/bin/bash
+apt update && apt install -y golang nginx
+
+export POSTGRES_PASSWORD=
+export POSTGRES_DB=
+export POSTGRES_URI=
+export SETUP_DB_URL=
+export SETUP_DB_TOKEN=
+export POLYGON_API_KEY=
+git clone https://github.com/WilliamDeLaEspriella/go-swechallenge /app
+cd /app
+go mod tidy
+
+go build -o app
+
+nohup ./app > output.log 2>&1 &

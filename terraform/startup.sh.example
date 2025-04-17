@@ -6,10 +6,10 @@ export POSTGRES_URI=
 export SETUP_DB_URL=
 export SETUP_DB_TOKEN=
 export POLYGON_API_KEY=
-git clone https://github.com/WilliamDeLaEspriella/go-swechallenge /app
-cd /app
-go mod tidy
+apt update && apt install -y docker.io docker-compose
 
-go build -o app-api
-chmod +x app-api
-nohup app-api > output.log 2>&1 &
+git clone https://github.com/WilliamDeLaEspriella/go-swechallenge /app
+
+cd /app
+
+docker-compose up -d

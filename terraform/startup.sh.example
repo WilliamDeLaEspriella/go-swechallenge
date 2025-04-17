@@ -11,6 +11,6 @@ git clone https://github.com/WilliamDeLaEspriella/go-swechallenge /app
 cd /app
 go mod tidy
 
-go build -o app
-
-nohup ./app > output.log 2>&1 &
+go build -o app-api
+chmod +x app-api
+nohup app-api > output.log 2>&1 &

@@ -2,13 +2,23 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"strings"
 
 	model "github.com/WilliamDeLaEspriella/go-swechallenge/models"
+	"github.com/WilliamDeLaEspriella/go-swechallenge/queries"
 )
 
 type RatingChangeRepository struct {
 	DB *sql.DB
+}
+
+var validOrderColumns = map[string]bool{
+	"created_at":  true,
+	"ticker":      true,
+	"target_to":   true,
+	"target_from": true,
 }
 
 func NewRatingChangeRepository(db *sql.DB) RatingChangeRepositoryInterface {
@@ -16,13 +26,7 @@ func NewRatingChangeRepository(db *sql.DB) RatingChangeRepositoryInterface {
 }
 
 func (repository *RatingChangeRepository) InsertRatingChange(post model.PostRatingChange) bool {
-	stmt, err := repository.DB.Prepare(
-		`INSERT INTO rating_changes (
-		    ticker, company, brokerage, action, rating_from, rating_to, target_from, target_to
-		) VALUES (
-		    $1, $2, $3, $4, $5, $6, $7, $8
-		)`,
-	)
+	stmt, err := repository.DB.Prepare(queries.InsertRatingChange)
 	if err != nil {
 		log.Println(err)
 		return false
@@ -45,9 +49,34 @@ func (repository *RatingChangeRepository) InsertRatingChange(post model.PostRati
 	return true
 }
 
-func (repository *RatingChangeRepository) SelectRatingChange(limit int, offset int) []model.RatingChange {
+func (repository *RatingChangeRepository) SelectRatingChange(query model.QueryRatingChange) []model.RatingChange {
 	var result []model.RatingChange
-	rows, err := repository.DB.Query("SELECT id, ticker, company, brokerage, action, rating_from, rating_to, target_from, target_to FROM rating_changes ORDER BY created_at DESC LIMIT $1 OFFSET $2", limit, offset)
+	orderColumn := query.OrderBy // por ejemplo: "ticker"
+	if !validOrderColumns[orderColumn] {
+		orderColumn = "created_at" // fallback seguro
+	}
+	var (
+		rows *sql.Rows
+		err  error
+	)
+	if query.Search != "" {
+		rows, err = repository.DB.Query(
+			fmt.Sprintf(queries.GetRatingChangesBySearch,
+				orderColumn,
+				orderFormat(query.Order)),
+			query.Search,
+			query.Page,
+			query.Offset)
+
+	} else {
+		rows, err = repository.DB.Query(
+			fmt.Sprintf(queries.GetRatingChanges,
+				orderColumn,
+				orderFormat(query.Order)),
+			query.Page,
+			query.Offset)
+	}
+
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -63,7 +92,6 @@ func (repository *RatingChangeRepository) SelectRatingChange(limit int, offset i
 			ratingTo   string
 			targetFrom float64
 			targetTo   float64
-		//	createdAt  string
 		)
 		err := rows.Scan(
 			&id,
@@ -75,7 +103,6 @@ func (repository *RatingChangeRepository) SelectRatingChange(limit int, offset i
 			&ratingTo,
 			&targetFrom,
 			&targetTo,
-		//	&createdAt,
 		)
 		if err != nil {
 			log.Println(err)
@@ -90,7 +117,40 @@ func (repository *RatingChangeRepository) SelectRatingChange(limit int, offset i
 				RatingTo:   ratingTo,
 				TargetFrom: targetFrom,
 				TargetTo:   targetTo,
-				//	CreatedAt:  createdAt,
+			}
+			result = append(result, manga)
+		}
+	}
+	return result
+}
+
+func orderFormat(order string) string {
+	if strings.ToUpper(order) == "ASC" {
+		return "ASC"
+	}
+	return "DESC"
+}
+func (repository *RatingChangeRepository) SelectBestRatingChange() []model.RatingChange {
+	var result []model.RatingChange
+	rows, err := repository.DB.Query(queries.BestRatingChange)
+	if err != nil {
+		log.Fatal("failed to execute query", err)
+		return nil
+	}
+	for rows.Next() {
+		var (
+			id      uint
+			ticker  string
+			company string
+		)
+		err := rows.Scan(&ticker, &company)
+		if err != nil {
+			log.Println(err)
+		} else {
+			manga := model.RatingChange{
+				Id:      id,
+				Ticker:  ticker,
+				Company: company,
 			}
 			result = append(result, manga)
 		}

@@ -9,6 +9,8 @@ import (
 	"github.com/WilliamDeLaEspriella/go-swechallenge/config"
 	controller "github.com/WilliamDeLaEspriella/go-swechallenge/controllers"
 	"github.com/WilliamDeLaEspriella/go-swechallenge/db"
+	"github.com/WilliamDeLaEspriella/go-swechallenge/queries"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -41,19 +43,7 @@ func (server *Server) CreateConnection() {
 }
 
 func (server *Server) CreateTables() {
-	if _, err := server.DB.Exec(
-		`CREATE TABLE IF NOT EXISTS rating_changes (
-			id SERIAL NOT NULL PRIMARY KEY,
-			ticker VARCHAR(10) NOT NULL,
-			company VARCHAR(100) NOT NULL,
-			brokerage VARCHAR(100) NOT NULL,
-			action VARCHAR(20) NOT NULL,
-			rating_from VARCHAR(50),
-			rating_to VARCHAR(50),
-			target_from DECIMAL(10, 2),
-			target_to DECIMAL(10, 2),
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`,
-	); err != nil {
+	if _, err := server.DB.Exec(queries.CreateTables); err != nil {
 		log.Fatal(err)
 		log.Println("ERROR", err)
 	}
@@ -61,7 +51,7 @@ func (server *Server) CreateTables() {
 
 func (server *Server) Migrate() {
 	var count int
-	err := server.DB.QueryRow("SELECT COUNT(*) FROM rating_changes").Scan(&count)
+	err := server.DB.QueryRow(queries.CountRatingChange).Scan(&count)
 	if err != nil {
 		log.Fatal("failed to execute setup db query", err)
 	}
@@ -71,13 +61,27 @@ func (server *Server) Migrate() {
 	}
 }
 
+func (server *Server) ConfigCors() {
+	gin.SetMode(config.Envs.GIN_MODE)
+	ginGonic := gin.Default()
+	ginGonic.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"}, // cambia según tu frontend
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	server.Routes = ginGonic
+}
+
 func (server *Server) CreateRoutes() {
 	gin.SetMode(config.Envs.GIN_MODE)
-	routes := gin.Default()
+	routes := server.Routes
 	controller := controller.NewRatingChangesController(server.DB)
 	routes.GET("/rating_changes", controller.GetRatingChanges)
 	routes.POST("/rating_changes", controller.InsertRatingChanges)
-	server.Routes = routes
+	routes.GET("/rating_changes/recommendation", controller.BestRatingChanges)
 }
 
 func (server *Server) Run() {

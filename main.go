@@ -9,6 +9,7 @@ func main() {
 	server.CreateConnection()
 	server.CreateTables()
 	server.Migrate()
+	server.ConfigCors()
 	server.CreateRoutes()
 	server.Run()
 }

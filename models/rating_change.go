@@ -22,3 +22,10 @@ type PostRatingChange struct {
 	TargetFrom float64 `json:"target_from"`
 	TargetTo   float64 `json:"target_to"`
 }
+type QueryRatingChange struct {
+	Search  string
+	Page    int
+	Offset  int
+	Order   string
+	OrderBy string
+}

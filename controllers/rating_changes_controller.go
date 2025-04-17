@@ -2,7 +2,6 @@ package controller
 
 import (
 	"database/sql"
-	"log"
 	"strconv"
 
 	model "github.com/WilliamDeLaEspriella/go-swechallenge/models"
@@ -21,7 +20,6 @@ func NewRatingChangesController(db *sql.DB) RatingChangesControllerInterface {
 func (controller *RatingChangesController) GetRatingChanges(g *gin.Context) {
 	pageStr := g.DefaultQuery("page", "1")
 	limitStr := g.DefaultQuery("limit", "10")
-	log.Println(pageStr, limitStr)
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
 		page = 1
@@ -34,8 +32,13 @@ func (controller *RatingChangesController) GetRatingChanges(g *gin.Context) {
 	offset := (page - 1) * limit
 	db := controller.DB
 	repo_rating := repository.NewRatingChangeRepository(db)
-	ratings_changes := repo_rating.SelectRatingChange(limit, offset)
-	log.Println("ratings_changes", ratings_changes)
+	ratings_changes := repo_rating.SelectRatingChange(model.QueryRatingChange{
+		Page:    limit,
+		Offset:  offset,
+		Search:  g.DefaultQuery("search", ""),
+		Order:   g.DefaultQuery("order", "DESC"),
+		OrderBy: g.DefaultQuery("orderBy", "created_at"),
+	})
 	if ratings_changes != nil {
 		g.JSON(200, gin.H{"status": "success", "data": ratings_changes, "msg": "get ratings_changes successfully"})
 	} else {
@@ -56,5 +59,16 @@ func (m *RatingChangesController) InsertRatingChanges(g *gin.Context) {
 		}
 	} else {
 		g.JSON(400, gin.H{"status": "success", "msg": err})
+	}
+}
+
+func (controller *RatingChangesController) BestRatingChanges(g *gin.Context) {
+	db := controller.DB
+	repo_rating := repository.NewRatingChangeRepository(db)
+	ratings_changes := repo_rating.SelectBestRatingChange()
+	if ratings_changes != nil {
+		g.JSON(200, gin.H{"status": "success", "data": ratings_changes, "msg": "get ratings_changes successfully"})
+	} else {
+		g.JSON(200, gin.H{"status": "success", "data": nil, "msg": "get ratings_changes successfully"})
 	}
 }

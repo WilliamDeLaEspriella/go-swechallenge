@@ -3,6 +3,7 @@ package repository
 import model "github.com/WilliamDeLaEspriella/go-swechallenge/models"
 
 type RatingChangeRepositoryInterface interface {
-	SelectRatingChange(limit int, offset int) []model.RatingChange
+	SelectRatingChange(query model.QueryRatingChange) []model.RatingChange
 	InsertRatingChange(post model.PostRatingChange) bool
+	SelectBestRatingChange() []model.RatingChange
 }

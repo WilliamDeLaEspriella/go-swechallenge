@@ -67,8 +67,10 @@ func (controller *RatingChangesController) BestRatingChanges(g *gin.Context) {
 	db := controller.DB
 	repo_rating := repository.NewRatingChangeRepository(db)
 	ratings_changes := repo_rating.SelectBestRatingChange()
-	if ratings_changes != nil {
-		g.JSON(200, gin.H{"status": "success", "data": ratings_changes, "msg": "get ratings_changes successfully"})
+	financeApi := finance.NewFinance(ratings_changes[0].Ticker)
+	financeStock := financeApi.GetFinanceStock()
+	if financeStock != nil {
+		g.JSON(200, gin.H{"status": "success", "data": financeStock, "msg": "get ratings_changes successfully"})
 	} else {
 		g.JSON(200, gin.H{"status": "success", "data": nil, "msg": "get ratings_changes successfully"})
 	}

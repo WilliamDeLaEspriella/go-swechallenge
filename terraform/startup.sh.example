@@ -12,4 +12,5 @@ git clone https://github.com/WilliamDeLaEspriella/go-swechallenge /app
 
 cd /app
 
+docker-compose build
 docker-compose up -d

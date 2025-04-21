@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -10,6 +11,9 @@ import (
 	controller "github.com/WilliamDeLaEspriella/go-swechallenge/controllers"
 	"github.com/WilliamDeLaEspriella/go-swechallenge/db"
 	"github.com/WilliamDeLaEspriella/go-swechallenge/queries"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -19,6 +23,8 @@ type Server struct {
 	DB     *sql.DB
 	Routes *gin.Engine
 }
+
+var ginLambda *ginadapter.GinLambdaV2
 
 func (server *Server) CreateConnection() {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=verify-full",
@@ -83,8 +89,15 @@ func (server *Server) CreateRoutes() {
 	routes.POST("/rating_changes", controller.InsertRatingChanges)
 	routes.GET("/rating_changes/recommendation", controller.BestRatingChanges)
 	routes.GET("/rating_changes/:id", controller.RatingChangesDetails)
+	ginLambda = ginadapter.NewV2(server.Routes)
+
 }
 
+func Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
+	// If no name is provided in the HTTP request body, throw an error
+	return ginLambda.ProxyWithContext(ctx, req)
+}
 func (server *Server) Run() {
-	server.Routes.Run(":" + config.Envs.PORT)
+	//server.Routes.Run(":" + config.Envs.PORT)
+	lambda.Start(Handler)
 }

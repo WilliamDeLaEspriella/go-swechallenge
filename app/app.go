@@ -71,7 +71,7 @@ func (server *Server) ConfigCors() {
 	gin.SetMode(config.Envs.GIN_MODE)
 	ginGonic := gin.Default()
 	ginGonic.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"}, // cambia según tu frontend
+		AllowOrigins:     []string{"http://localhost:5173", "https://vue2-swechallenge-9wnqaoo6t-william-de-la-espriellas-projects.vercel.app"}, // cambia según tu frontend
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

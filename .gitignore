@@ -3,10 +3,12 @@ go.sum
 *.mod~
 .DS_Store
 Thumbs.db
+bootstrap
+function.zip
 
-terraform/.terraform/providers/registry.terraform.io/digitalocean/digitalocean/2.51.0/darwin_arm64
-terraform/.terraform.lock.hcl
-terraform/terraform.tfstate.backup
+terraform/.terraform/*
+terraform.tfstate.backup
 terraform/startup.sh
 terraform/terraform.tfstate
 terraform/terraform.tfvars
+.terraform.lock.hcl

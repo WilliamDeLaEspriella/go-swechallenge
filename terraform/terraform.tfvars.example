@@ -1,2 +1,0 @@
-do_token        = "xxxxxx"
-ssh_fingerprint = "you_ssh_fingerprint" # lo obtienes desde tu cuenta de DO
